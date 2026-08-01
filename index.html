@@ -2430,6 +2430,18 @@
     </div>
     <button class="game-link-btn" style="margin-top:14px;" onclick="addExtraRow()">+ Añadir línea</button>
     <p style="font-size:12px; color:#999; margin-top:14px;">Los importes de la columna "Real" se guardan automáticamente en este dispositivo (localStorage) y no se pierden al cerrar la app.</p>
+
+    <div class="section-title" style="margin-top:28px;">🍽️ Comida (gasto diario — no cuenta para el presupuesto de vacaciones)</div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <table class="budget-table presupuesto-table">
+        <thead><tr><th>Fecha</th><th>Concepto</th><th>Detalle</th><th style="text-align:right;">Importe</th></tr></thead>
+        <tbody id="comida-tbody"></tbody>
+        <tfoot>
+          <tr class="presupuesto-total-row"><td colspan="3">TOTAL COMIDA</td><td class="amount" id="comida-total">€0</td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <p style="font-size:12px; color:#999; margin-top:14px;">Comida es un gasto que pagaríais igualmente aunque no estuvierais de vacaciones, así que se lleva aparte y no suma al total del viaje de arriba. Los caprichos (dulces, helados, etc.) sí cuentan como gasto de vacaciones y están arriba, en "🧾 Gastos reales registrados".</p>
   </div>
 </div>
 
@@ -2439,11 +2451,36 @@ function showScreen(name) {
   document.getElementById('screen-' + name).classList.add('active');
   window.scrollTo(0,0);
   if (name === 'calendario') renderCalendar();
-  if (name === 'presupuesto') renderPresupuesto();
+  if (name === 'presupuesto') { renderPresupuesto(); renderComida(); }
+}
+
+// ---- COMIDA: gasto diario real (no cuenta para el presupuesto de vacaciones) ----
+var COMIDA_GASTOS = [
+  {fecha: "27/07/2026", concepto: "Comida", detalle: "Mercadona La Bisbal", importe: 116.51},
+  {fecha: "29/07/2026", concepto: "Comida", detalle: "Can Padrés 1 — Pals", importe: 37.20},
+  {fecha: "31/07/2026", concepto: "Comida", detalle: "Anxoves Callol Serrats — Girona", importe: 19.50},
+  {fecha: "31/07/2026", concepto: "Comida", detalle: "Mercadona La Bisbal", importe: 70.42}
+];
+function renderComida() {
+  var tbody = document.getElementById('comida-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  var total = 0;
+  COMIDA_GASTOS.forEach(function(row) {
+    total += row.importe;
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + row.fecha + '</td>' +
+      '<td>' + row.concepto + '</td>' +
+      '<td>' + row.detalle + '</td>' +
+      '<td class="amount">' + fmtEuro(row.importe) + '</td>';
+    tbody.appendChild(tr);
+  });
+  var totEl = document.getElementById('comida-total');
+  if (totEl) totEl.textContent = fmtEuro(total);
 }
 
 // ---- PRESUPUESTO: persistencia en localStorage ----
-var PRESUPUESTO_BASE = [{"id": "mp_confirmado", "grupo": "✅ Confirmado", "label": "🌿 Mas Pareta (alquiler semana)", "estimado": 800}, {"id": "hotel_clermont", "grupo": "✅ Confirmado", "label": "🏨 Hotel Clermont-Ferrand (Ace Hôtel)", "estimado": 108.3}, {"id": "hotel_paris", "grupo": "✅ Confirmado", "label": "🏨 Hotel París (Citadines)", "estimado": 514.78}, {"id": "hotel_futuroscope", "grupo": "✅ Confirmado", "label": "🏨 Hotel Futuroscope (Campanile)", "estimado": 262.6}, {"id": "louvre", "grupo": "✅ Confirmado", "label": "🎨 Louvre (entradas)", "estimado": 44}, {"id": "futuroscope_aquascope", "grupo": "✅ Confirmado", "label": "🎡 Futuroscope 2 días + Aquascope", "estimado": 518}, {"id": "saintechapelle", "grupo": "✅ Confirmado", "label": "⛪ Sainte-Chapelle (entradas)", "estimado": 32}, {"id": "hotel_burdeos", "grupo": "🟠 Pendiente", "label": "🏨 Hotel Burdeos (1 noche, est.)", "estimado": 130}, {"id": "combustible", "grupo": "🟠 Pendiente", "label": "⛽ Combustible PHEV (~2.250 km, est.)", "estimado": 275}, {"id": "peajes", "grupo": "🟠 Pendiente", "label": "🛣️ Peajes España + Francia (est.)", "estimado": 141}, {"id": "metro_paris", "grupo": "🟠 Pendiente", "label": "🚇 Metro/RER París (est.)", "estimado": 70}, {"id": "notredame", "grupo": "🟠 Pendiente", "label": "🏔️ Torres de Notre-Dame (est.)", "estimado": 32}, {"id": "varios", "grupo": "🟠 Pendiente", "label": "🎒 Varios: parking, snacks, extras (est.)", "estimado": 215}, {"id": "orsay", "grupo": "⚪ Probable", "label": "🖼️ Museo Orsay (est.)", "estimado": 32}, {"id": "eiffel", "grupo": "⚪ Probable", "label": "🗼 Torre Eiffel", "estimado": 0}];
+var PRESUPUESTO_BASE = [{"id": "mp_confirmado", "grupo": "✅ Confirmado", "label": "🌿 Mas Pareta (alquiler semana)", "estimado": 800}, {"id": "hotel_clermont", "grupo": "✅ Confirmado", "label": "🏨 Hotel Clermont-Ferrand (Ace Hôtel)", "estimado": 108.3}, {"id": "hotel_paris", "grupo": "✅ Confirmado", "label": "🏨 Hotel París (Citadines)", "estimado": 514.78}, {"id": "hotel_futuroscope", "grupo": "✅ Confirmado", "label": "🏨 Hotel Futuroscope (Campanile)", "estimado": 262.6}, {"id": "louvre", "grupo": "✅ Confirmado", "label": "🎨 Louvre (entradas)", "estimado": 44}, {"id": "futuroscope_aquascope", "grupo": "✅ Confirmado", "label": "🎡 Futuroscope 2 días + Aquascope", "estimado": 518}, {"id": "saintechapelle", "grupo": "✅ Confirmado", "label": "⛪ Sainte-Chapelle (entradas)", "estimado": 32}, {"id": "hotel_burdeos", "grupo": "🟠 Pendiente", "label": "🏨 Hotel Burdeos (1 noche, est.)", "estimado": 130}, {"id": "combustible", "grupo": "🟠 Pendiente", "label": "⛽ Combustible PHEV (~2.250 km, est.)", "estimado": 275}, {"id": "peajes", "grupo": "🟠 Pendiente", "label": "🛣️ Peajes España + Francia (est.)", "estimado": 141}, {"id": "metro_paris", "grupo": "🟠 Pendiente", "label": "🚇 Metro/RER París (est.)", "estimado": 70}, {"id": "notredame", "grupo": "🟠 Pendiente", "label": "🏔️ Torres de Notre-Dame (est.)", "estimado": 32}, {"id": "varios", "grupo": "🟠 Pendiente", "label": "🎒 Varios: parking, snacks, extras (est.)", "estimado": 215}, {"id": "orsay", "grupo": "⚪ Probable", "label": "🖼️ Museo Orsay (est.)", "estimado": 32}, {"id": "eiffel", "grupo": "⚪ Probable", "label": "🗼 Torre Eiffel", "estimado": 0}, {"id": "real_0731_parking", "grupo": "🧾 Gastos reales registrados", "label": "🅿️ 31/07 Parking — parquímetro L'Escala", "estimado": 0, "real": 4.00}, {"id": "real_0731_kayak", "grupo": "🧾 Gastos reales registrados", "label": "🚣 31/07 Entradas/Actividades — Kayak del Ter (Colomers)", "estimado": 0, "real": 49.50}, {"id": "real_0731_gasolina", "grupo": "🧾 Gastos reales registrados", "label": "⛽ 31/07 Gasolina — Estació Servei Corçà", "estimado": 0, "real": 56.90}, {"id": "real_0731_carga", "grupo": "🧾 Gastos reales registrados", "label": "🔌 31/07 Carga eléctrica coche — Iberdrola (Bilbao)", "estimado": 0, "real": 1.33}, {"id": "real_0729_devolucion", "grupo": "🧾 Gastos reales registrados", "label": "🔌 29/07 Devolución carga eléctrica — Movilidad MMD (Madrid)", "estimado": 0, "real": -1.95}, {"id": "real_0729_carga", "grupo": "🧾 Gastos reales registrados", "label": "🔌 29/07 Carga eléctrica coche — Movilidad MMD (Madrid)", "estimado": 0, "real": 5.40}, {"id": "real_0727_carga1", "grupo": "🧾 Gastos reales registrados", "label": "🔌 27/07 Carga eléctrica coche — Iberdrola (Bilbao)", "estimado": 0, "real": 2.00}, {"id": "real_0727_carga2", "grupo": "🧾 Gastos reales registrados", "label": "🔌 27/07 Carga eléctrica coche — Endolla BSM (Barcelona)", "estimado": 0, "real": 4.88}, {"id": "real_0728_capricho", "grupo": "🧾 Gastos reales registrados", "label": "🍦 28/07 Caprichos comida — Fleca Sancho (L'Armentera)", "estimado": 0, "real": 14.31}, {"id": "real_0730_capricho", "grupo": "🧾 Gastos reales registrados", "label": "🍦 30/07 Caprichos comida — Fleca Sancho (L'Armentera)", "estimado": 0, "real": 15.07}, {"id": "real_0731_capricho1", "grupo": "🧾 Gastos reales registrados", "label": "🍦 31/07 Caprichos comida — Strambotic (Girona)", "estimado": 0, "real": 3.00}, {"id": "real_0731_capricho2", "grupo": "🧾 Gastos reales registrados", "label": "🍦 31/07 Caprichos comida — Strambotic (Girona)", "estimado": 0, "real": 11.70}];
 function loadPresupuestoReal() { return JSON.parse(localStorage.getItem('presupuestoReal2026') || '{}'); }
 function loadPresupuestoExtra() { return JSON.parse(localStorage.getItem('presupuestoExtra2026') || '[]'); }
 function savePresupuestoExtra(arr) { localStorage.setItem('presupuestoExtra2026', JSON.stringify(arr)); }
@@ -2496,7 +2533,7 @@ function renderPresupuesto() {
       tbody.appendChild(trh);
     }
     var tr = document.createElement('tr');
-    var valReal = real.hasOwnProperty(item.id) ? real[item.id] : '';
+    var valReal = real.hasOwnProperty(item.id) ? real[item.id] : (item.real !== undefined ? item.real : '');
     tr.innerHTML = '<td>' + item.label + '</td>' +
       '<td class="amount">' + fmtEuro(item.estimado) + '</td>' +
       '<td><input type="number" step="0.01" class="real-input" data-id="' + item.id + '" value="' + valReal + '" placeholder="0" oninput="onRealInput(this)"></td>';
@@ -2521,6 +2558,7 @@ function calcularTotalesPresupuesto() {
   PRESUPUESTO_BASE.forEach(function(item) {
     totalEst += item.estimado;
     if (real.hasOwnProperty(item.id) && !isNaN(real[item.id])) totalReal += Number(real[item.id]);
+    else if (item.real !== undefined && !isNaN(item.real)) totalReal += Number(item.real);
   });
   loadPresupuestoExtra().forEach(function(row) {
     if (row.real !== undefined && row.real !== null && row.real !== '' && !isNaN(row.real)) totalReal += Number(row.real);
@@ -2625,6 +2663,7 @@ function closeModalBg(e) { if (e.target.id === 'modal-overlay') closeModal(); }
 document.addEventListener('DOMContentLoaded', function() {
   loadTaskState();
   renderPresupuesto();
+  renderComida();
 });
 </script>
 
