@@ -350,6 +350,7 @@
     <button class="menu-btn" style="background:linear-gradient(135deg,#0e7490,#155e75);" onclick="showScreen('mapas')"><span class="emoji">🗺️</span>Mapas</button>
     <button class="menu-btn" style="background:linear-gradient(135deg,#e65100,#bf360c);" onclick="showScreen('entradas')"><span class="emoji">🎫</span>Entradas</button>
     <button class="menu-btn" style="background:linear-gradient(135deg,#7b3fa0,#5a2d7a);" onclick="showScreen('juegos')"><span class="emoji">🎮</span>Juegos</button>
+    <button class="menu-btn" style="background:linear-gradient(135deg,#4a2b6d,#2e1a45);" onclick="showScreen('guardianes')"><span class="emoji">🗿</span>Guardianes</button>
     <button class="menu-btn" style="background:linear-gradient(135deg,#2e7d32,#1b5e20);" onclick="showScreen('presupuesto')"><span class="emoji">💰</span>Presupuesto</button>
     <button class="menu-btn" style="background:linear-gradient(135deg,#37474f,#263238);" onclick="showScreen('tareas')"><span class="emoji">✅</span>Tareas</button>
   </div>
@@ -2222,6 +2223,54 @@
   </div>
 </div>
 
+<!-- ============ PANTALLA: GUARDIANES DE PARÍS ============ -->
+<div id="screen-guardianes" class="screen">
+  <div class="topbar"><button class="back-btn" onclick="showScreen('menu')">← Menú</button><h2>🗿 Guardianes de París</h2><button class="home-btn" onclick="showScreen('portada')" title="Portada">🏠</button></div>
+  <div class="container-narrow">
+
+    <div class="card" id="guard-intro-card" style="border-left:4px solid #4a2b6d; display:none;">
+      <div class="card-title">🗿 ¿Quién es Gaspard?</div>
+      <p style="font-size:13.5px; color:#444; line-height:1.5;">Bajo los tejados de París vive Gaspard, una pequeña gárgola de piedra que cayó de Notre-Dame la noche del incendio de 2019. Desde entonces busca ayuda para recomponer el <strong>Ascua de los Guardianes</strong>: una luz mágica que protegía el espíritu de la ciudad y que se rompió en 5 fragmentos, escondidos cerca de los grandes monumentos de París. Solo los exploradores con ojos curiosos pueden verlo... ¿le ayudáis a encontrarla, Pablo y Clara?</p>
+      <button class="game-link-btn" style="margin-top:10px;" onclick="cerrarIntroGuardianes()">¡Vamos allá!</button>
+    </div>
+
+    <div class="card" id="gaspard-card" style="border-left:4px solid #7b3fa0;">
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div style="font-size:40px; line-height:1;">🗿</div>
+        <div>
+          <div class="card-title" style="margin-bottom:4px; font-size:14px;">Gaspard dice...</div>
+          <p id="gaspard-frase" style="font-size:14px; color:#444; margin:0; font-style:italic;">Cargando...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <strong id="guard-nivel-nombre" style="color:#5a2d7a; font-size:14px;">Aspirante a Guardián</strong>
+        <span id="guard-xp-label" style="font-size:12px; color:#888;">0 XP</span>
+      </div>
+      <div style="background:#eee; border-radius:8px; height:10px; overflow:hidden;">
+        <div id="guard-xp-bar" style="background:linear-gradient(90deg,#7b3fa0,#5a2d7a); height:100%; width:0%; transition:width .4s;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💎 El Ascua de los Guardianes</div>
+      <p style="font-size:13px; color:#666; margin-top:-4px;">Un fragmento por cada gran secreto que encontréis. Reunidlos todos antes de salir de París.</p>
+      <div id="ascua-gajos" style="display:flex; gap:10px; margin-top:10px; justify-content:center;"></div>
+      <div id="ascua-final-btn-wrap" style="display:none; margin-top:14px; text-align:center;">
+        <button class="game-link-btn" onclick="abrirFinalEpico()">🏅 ¡Recomponer el Ascua!</button>
+      </div>
+    </div>
+
+    <div id="guardianes-territorios"></div>
+
+    <div class="warn-box" style="margin-top:14px; margin-bottom:20px;">
+      💡 Cómo se juega: tocad cada misión cuando lleguéis a ese punto del itinerario (o cuando os apetezca repasarla), leed la pista de Gaspard, hacedla en la vida real — observar, buscar, fotografiar, inventar — y marcadla como hecha. El progreso se guarda solo en este móvil.
+    </div>
+  </div>
+</div>
+
 <!-- ============ PANTALLA: PRESUPUESTO ============ -->
 <div id="screen-presupuesto" class="screen">
   <div class="topbar"><button class="back-btn" onclick="showScreen('menu')">← Menú</button><h2>💰 Presupuesto</h2><button class="home-btn" onclick="showScreen('portada')" title="Portada">🏠</button></div>
@@ -2260,6 +2309,7 @@ function showScreen(name) {
   window.scrollTo(0,0);
   if (name === 'calendario') renderCalendar();
   if (name === 'presupuesto') { renderPresupuesto(); renderComida(); }
+  if (name === 'guardianes') renderGuardianes();
 }
 
 // ---- COMIDA: gasto diario real (no cuenta para el presupuesto de vacaciones) ----
@@ -2397,6 +2447,185 @@ function loadTaskState() {
   });
 }
 
+// ---- GUARDIANES DE PARÍS ----
+var GUARD_NIVELES = [
+  {nivel:0, xp:0, nombre:'Aspirante a Guardián'},
+  {nivel:1, xp:50, nombre:'Explorador Novato'},
+  {nivel:2, xp:120, nombre:'Buscador de Sombras'},
+  {nivel:3, xp:200, nombre:'Aprendiz de Guardián'},
+  {nivel:4, xp:300, nombre:'Guardián de Bronce'},
+  {nivel:5, xp:420, nombre:'Rastreador Urbano'},
+  {nivel:6, xp:560, nombre:'Guardián de Plata'},
+  {nivel:7, xp:720, nombre:'Descifrador de Sellos'},
+  {nivel:8, xp:900, nombre:'Vigía de las Alturas'},
+  {nivel:9, xp:1100, nombre:'Guardián de Oro'},
+  {nivel:10, xp:1350, nombre:'Maestro Explorador'},
+  {nivel:11, xp:1650, nombre:'Guardián de París'}
+];
+
+var MISIONES_GUARDIANES = [
+  {id:'M1', territorio:'🌆 Montmartre · Viernes 7', dia:'2026-08-07', nombre:'El Molino Rojo y el Corazón del Cabaret', lugar:'Moulin Rouge / Pigalle', pista:'Psst... acercaos. Cerca del molino rojo hay algo que brilla que no deberíais dejar pasar.', reto:'🔍 Observación: contad juntos cuántas aspas tiene el molino rojo. Lleva bailando desde 1889 — ¡más de 130 años!', xp:40, fragmento:null},
+  {id:'M2', territorio:'🌆 Montmartre · Viernes 7', dia:'2026-08-07', nombre:'El Café de una Historia de Verdad', lugar:'Café des Deux Moulins', pista:'He visto rodar mil películas desde los tejados de aquí cerca...', reto:'🎨 Creatividad: inventad en voz alta una escena de película que podría rodarse en este café.', xp:30, fragmento:null},
+  {id:'M3', territorio:'🌆 Montmartre · Viernes 7', dia:'2026-08-07', nombre:'Tras los Pasos de un Genio Solitario', lugar:'Casa de Van Gogh (54 Rue Lepic)', pista:'Hubo alguien que vivió aquí y veía el mundo de forma distinta a todos los demás, como yo.', reto:'📜 Historia: buscad la fachada del nº 54 y contad qué pintor vivió allí.', xp:40, fragmento:null},
+  {id:'M4', territorio:'🌆 Montmartre · Viernes 7', dia:'2026-08-07', nombre:'El Último Molino de Harina', lugar:'Molinos de Montmartre', pista:'Cerca de aquí hay algo que brilla que no deberíais dejar pasar... el primer fragmento de mi Ascua.', reto:'🧭 Búsqueda: buscad un mosaico pequeño y pixelado escondido cerca del Moulin de la Galette (app FlashInvaders en modo radar).', xp:100, fragmento:'f1'},
+  {id:'M5', territorio:'🌆 Montmartre · Viernes 7', dia:'2026-08-07', nombre:'El Mirador de Piedra Blanca', lugar:'Sacré-Cœur', pista:'Subid hasta arriba del todo. Desde ahí veréis toda la ciudad que vais a explorar.', reto:'📷 Fotografía: haced la mejor foto panorámica de París al atardecer, los cuatro juntos.', xp:50, fragmento:null},
+
+  {id:'M6', territorio:'🏛️ Cristal y Piedra · Sábado 8', dia:'2026-08-08', nombre:'La Pirámide de Cristal', lugar:'Louvre', pista:'Este es el primer gran templo de los Guardianes. Dentro hay otro juego entero esperándoos.', reto:'🎮 Jugad a "Caza del Tesoro Real" (pantalla Juegos) — las 9 misiones del Louvre cuentan como esta misión.', xp:120, fragmento:null},
+  {id:'M7', territorio:'🏛️ Cristal y Piedra · Sábado 8', dia:'2026-08-08', nombre:'El Jardín de las Reinas', lugar:'Jardín de las Tullerías', pista:'Un jardín con nombre de reina que ya no vive aquí...', reto:'🤝 Equipo: buscad entre todos 3 cosas del jardín que os parezcan mucho más antiguas que vosotros.', xp:20, fragmento:null},
+  {id:'M8', territorio:'🏛️ Cristal y Piedra · Sábado 8', dia:'2026-08-08', nombre:'La Cúpula de los Grandes Hombres', lugar:'Panthéon', pista:'Aquí guardan la memoria de los grandes parisinos... y otro fragmento de mi luz.', reto:'🧩 Acertijo: buscad los sellos PA-03 y PA-04 en la Rue de la Montagne Sainte-Geneviève, la calle que sube al Panthéon.', xp:100, fragmento:'f2'},
+  {id:'M9', territorio:'🏛️ Cristal y Piedra · Sábado 8', dia:'2026-08-08', nombre:'El Mercado de las Mil Especias', lugar:'Rue Mouffetard', pista:'Oled, mirad, escuchad. Este mercado lleva siglos vivo.', reto:'🔍 Observación: contad cuántos olores distintos reconocéis en 1 minuto caminando por el mercado.', xp:15, fragmento:null},
+  {id:'M10', territorio:'🏛️ Cristal y Piedra · Sábado 8', dia:'2026-08-08', nombre:'La Joya de Cristal Escondida', lugar:'Sainte-Chapelle', pista:'Aquí la luz brilla de un modo distinto a cualquier otro sitio de París.', reto:'🔍 Observación: contad cuántos colores distintos veis en las vidrieras.', xp:30, fragmento:null},
+  {id:'M11', territorio:'🏛️ Cristal y Piedra · Sábado 8', dia:'2026-08-08', nombre:'La Librería que Cruza el Tiempo', lugar:'Shakespeare & Co', pista:'Hay un sello mío en la propia fachada de esta librería, ¿lo encontráis?', reto:'🎨 Creatividad: inventad el título de un libro sobre vuestro propio viaje.', xp:25, fragmento:null},
+  {id:'M12', territorio:'🏛️ Cristal y Piedra · Sábado 8', dia:'2026-08-08', nombre:'El Helado de los Guardianes', lugar:'Berthillon', pista:'Un pequeño descanso también forma parte de la aventura.', reto:'🎨 Creatividad: elegid sabor y contad una mini-historia inventada de una frase sobre por qué lo habéis elegido.', xp:15, fragmento:null},
+  {id:'M13', territorio:'🏛️ Cristal y Piedra · Sábado 8', dia:'2026-08-08', nombre:'La Dama de Piedra que Sobrevivió al Fuego', lugar:'Notre-Dame', pista:'Dejad que os cuente algo que llevo guardando desde 2019...', reto:'🔍 Observación + 📜 Historia: buscad la fachada y escuchad la historia completa del incendio y la reconstrucción real de la catedral (reabrió en diciembre de 2024).', xp:100, fragmento:'f3'},
+
+  {id:'M14', territorio:'🗼 Las Alturas · Domingo 9', dia:'2026-08-09', nombre:'El Arco que Nunca se Apaga', lugar:'Arco de Triunfo', pista:'Hay luces que nunca deben apagarse, como esta llama... o como mi Ascua.', reto:'📜 Historia: buscad la llama eterna bajo el arco — arde sin parar desde 1923.', xp:30, fragmento:null},
+  {id:'M15', territorio:'🗼 Las Alturas · Domingo 9', dia:'2026-08-09', nombre:'La Aguja Robada de Egipto', lugar:'Obelisco de la Concordia', pista:'Yo solo tengo unos 200 años. Esto que vais a ver tiene más de 3.000.', reto:'🧩 Acertijo: adivinad cuántos años tiene el obelisco antes de comprobarlo.', xp:25, fragmento:null},
+  {id:'M16', territorio:'🗼 Las Alturas · Domingo 9', dia:'2026-08-09', nombre:'El Palacio del Tiempo Detenido', lugar:'Museo de Orsay', pista:'Esto fue una estación de tren. Las ciudades cambian, pero no pierden su alma.', reto:'🔍 Observación: buscad un reloj grande dentro del museo.', xp:30, fragmento:null},
+  {id:'M17', territorio:'🗼 Las Alturas · Domingo 9', dia:'2026-08-09', nombre:'El Mirador de Chaillot', lugar:'Trocadéro', pista:'Preparaos. Lo que viene ahora es el momento más alto del viaje... en todos los sentidos.', reto:'📷 Fotografía: foto familiar con la Torre Eiffel de fondo.', xp:20, fragmento:null},
+  {id:'M18', territorio:'🗼 Las Alturas · Domingo 9', dia:'2026-08-09', nombre:'La Torre que Toca el Cielo', lugar:'Torre Eiffel + crucero nocturno', pista:'A mí me da vértigo, ¡soy de piedra, no de hierro! Pero ahí arriba, en la plataforma más alta, está mi fragmento más brillante.', reto:'🤝 Equipo: durante el crucero nocturno, buscad juntos el momento en que la torre se ilumina y celebradlo con vuestro grito de guardianes.', xp:120, fragmento:'f4'},
+
+  {id:'M19a', territorio:'🏘️ El Último Secreto · Lunes 10', dia:'2026-08-10', nombre:'La Plaza del Escritor Fantasma', lugar:'Place des Vosges', pista:'Un antiguo Guardián vivió justo aquí, y fue quien escribió por primera vez la leyenda de mi Ascua para que nunca se olvidara.', reto:'📜 Historia: buscad en qué número de la plaza vivió Victor Hugo.', xp:30, fragmento:null},
+  {id:'M19b', territorio:'🏘️ El Último Secreto · Lunes 10', dia:'2026-08-10', nombre:'El Barrio que el Tiempo Olvidó', lugar:'Callejuelas de Le Marais', pista:'Por aquí hay más sellos escondidos que en ningún otro barrio... buscadlos con la app FlashInvaders.', reto:'🧭 Búsqueda: recorred Rue des Francs-Bourgeois en modo radar con FlashInvaders.', xp:25, fragmento:null},
+  {id:'M20', territorio:'🏘️ El Último Secreto · Lunes 10', dia:'2026-08-10', nombre:'El Último Fragmento', lugar:'Rue des Rosiers', pista:'Este es el último. Después de este, ya solo queda recomponerlo entre todos.', reto:'🤝 Equipo: resolved juntos — ¿qué significa "Pletzl" y por qué se llama así este barrio?', xp:120, fragmento:'f5'}
+];
+
+var FRAGMENTOS_ASCUA = {
+  f1: {nombre:'La Chispa del Molino', color:'#e6742c'},
+  f2: {nombre:'La Luz del Saber', color:'#d4af37'},
+  f3: {nombre:'El Reflejo de Piedra', color:'#7fa8c9'},
+  f4: {nombre:'El Brillo de las Alturas', color:'#2d5ad1'},
+  f5: {nombre:'El Último Destello', color:'#2e8b57'}
+};
+
+function loadGuardianesState() {
+  return JSON.parse(localStorage.getItem('guardianesParis2026') || '{}');
+}
+function saveGuardianesState(state) {
+  localStorage.setItem('guardianesParis2026', JSON.stringify(state));
+}
+function guardXPTotal(state) {
+  var total = 0;
+  MISIONES_GUARDIANES.forEach(function(m) { if (state[m.id]) total += m.xp; });
+  return total;
+}
+function guardNivelActual(xp) {
+  var actual = GUARD_NIVELES[0];
+  for (var i = 0; i < GUARD_NIVELES.length; i++) { if (xp >= GUARD_NIVELES[i].xp) actual = GUARD_NIVELES[i]; }
+  return actual;
+}
+function guardFragmentosConseguidos(state) {
+  var arr = [];
+  MISIONES_GUARDIANES.forEach(function(m) { if (m.fragmento && state[m.id]) arr.push(m.fragmento); });
+  return arr;
+}
+function cerrarIntroGuardianes() {
+  localStorage.setItem('guardianesIntroVista2026', '1');
+  document.getElementById('guard-intro-card').style.display = 'none';
+}
+function gaspardCelebracion() {
+  var frases = ['¡Voilà! ¡Ahí está! Sabía que erais los indicados.', '¡Magnifique! Uno menos. Y no ha sido nada fácil, ¿eh?', 'Sentid cómo brilla un poco más fuerte ahora... eso es cosa vuestra.', 'Guardadlo bien. Cada fragmento es un pedacito de historia de verdad.'];
+  return frases[Math.floor(Math.random() * frases.length)];
+}
+function gaspardFraseDelMomento(state) {
+  var hoyStr = new Date().toISOString().slice(0, 10);
+  var misionesHoy = MISIONES_GUARDIANES.filter(function(m) { return m.dia === hoyStr && !state[m.id]; });
+  if (misionesHoy.length) {
+    return '¡Bonjour, mis pequeños Guardianes! Hoy toca "' + misionesHoy[0].nombre + '". Mmm... esto huele a fragmento cercano.';
+  }
+  var todasHoy = MISIONES_GUARDIANES.filter(function(m) { return m.dia === hoyStr; });
+  if (todasHoy.length && todasHoy.every(function(m) { return state[m.id]; })) {
+    return 'Habéis completado todo lo de hoy. Descansad, exploradores. Mañana hay más luz que encontrar.';
+  }
+  var pendientes = MISIONES_GUARDIANES.filter(function(m) { return !state[m.id]; });
+  if (!pendientes.length) return '¡Lo habéis encontrado todo! Ya solo queda recomponer el Ascua entre toda la familia.';
+  return 'Psst... acercaos. Tengo algo que enseñaros antes de que empecéis a caminar.';
+}
+function completarMisionGuardianes(id) {
+  var state = loadGuardianesState();
+  if (state[id]) return;
+  state[id] = true;
+  saveGuardianesState(state);
+  renderGuardianes();
+  var m = MISIONES_GUARDIANES.filter(function(x) { return x.id === id; })[0];
+  var content = document.getElementById('modal-content');
+  content.innerHTML = '<div class="card" style="text-align:center;"><div style="font-size:40px;">🗿✨</div><div class="card-title" style="justify-content:center;">¡Misión completada!</div><p style="font-size:14px; color:#555;">"' + gaspardCelebracion() + '"</p><p style="font-size:13px; color:#888; margin-top:8px;">+' + m.xp + ' XP' + (m.fragmento ? ' · ¡Fragmento del Ascua conseguido! 💎' : '') + '</p></div>';
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function abrirFinalEpico() {
+  var state = loadGuardianesState();
+  state['FINAL'] = true;
+  saveGuardianesState(state);
+  renderGuardianes();
+  var content = document.getElementById('modal-content');
+  content.innerHTML = '<div class="card" style="text-align:center;">' +
+    '<div style="font-size:48px;">🗿💫</div>' +
+    '<div class="card-title" style="justify-content:center;">¡El Ascua está completa!</div>' +
+    '<p style="font-size:14px; color:#555; line-height:1.5;">"Gracias. De verdad. El Ascua nunca fue solo magia antigua — siempre fue esto: una familia cuidando esta ciudad con cariño. Sois, oficialmente, <strong>Guardianes de París</strong>. Y eso no se olvida nunca."</p>' +
+    '<p style="font-size:13px; color:#888; margin-top:10px;">🏅 Insignia Legendaria desbloqueada: <strong>Guardián de París</strong></p>' +
+    '</div>';
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function renderGuardianes() {
+  var state = loadGuardianesState();
+  var xp = guardXPTotal(state);
+  var nivel = guardNivelActual(xp);
+  var nivelIdx = GUARD_NIVELES.indexOf(nivel);
+  var siguiente = GUARD_NIVELES[nivelIdx + 1];
+  var pct = siguiente ? Math.min(100, Math.round((xp - nivel.xp) / (siguiente.xp - nivel.xp) * 100)) : 100;
+
+  var introCard = document.getElementById('guard-intro-card');
+  if (introCard) introCard.style.display = localStorage.getItem('guardianesIntroVista2026') ? 'none' : 'block';
+
+  document.getElementById('gaspard-frase').textContent = gaspardFraseDelMomento(state);
+  document.getElementById('guard-nivel-nombre').textContent = 'Nv.' + nivel.nivel + ' · ' + nivel.nombre;
+  document.getElementById('guard-xp-label').textContent = xp + (siguiente ? ' / ' + siguiente.xp : '') + ' XP';
+  document.getElementById('guard-xp-bar').style.width = pct + '%';
+
+  var frags = guardFragmentosConseguidos(state);
+  var gajosEl = document.getElementById('ascua-gajos');
+  gajosEl.innerHTML = '';
+  Object.keys(FRAGMENTOS_ASCUA).forEach(function(fid) {
+    var info = FRAGMENTOS_ASCUA[fid];
+    var tiene = frags.indexOf(fid) > -1;
+    var div = document.createElement('div');
+    div.style.cssText = 'width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; ' + (tiene ? ('background:' + info.color + '; box-shadow:0 0 8px ' + info.color + ';') : 'background:#e0e0e0;');
+    div.title = tiene ? info.nombre : '???';
+    div.textContent = tiene ? '💎' : '';
+    gajosEl.appendChild(div);
+  });
+  var finalWrap = document.getElementById('ascua-final-btn-wrap');
+  if (finalWrap) finalWrap.style.display = (frags.length >= 5 && !state['FINAL']) ? 'block' : 'none';
+
+  var cont = document.getElementById('guardianes-territorios');
+  if (!cont) return;
+  cont.innerHTML = '';
+  var territorios = [];
+  MISIONES_GUARDIANES.forEach(function(m) { if (territorios.indexOf(m.territorio) === -1) territorios.push(m.territorio); });
+  territorios.forEach(function(terr) {
+    var sec = document.createElement('div');
+    sec.className = 'section-title';
+    sec.style.marginTop = '18px';
+    sec.textContent = terr;
+    cont.appendChild(sec);
+    MISIONES_GUARDIANES.filter(function(m) { return m.territorio === terr; }).forEach(function(m) {
+      var hecha = !!state[m.id];
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.style.opacity = hecha ? '0.7' : '1';
+      card.innerHTML =
+        '<div class="card-title" style="font-size:14px;">' + (hecha ? '✅ ' : '🔒 ') + m.nombre + '</div>' +
+        '<p style="font-size:12px; color:#999; margin:2px 0 8px;">📍 ' + m.lugar + '</p>' +
+        '<p style="font-size:13px; color:#7b3fa0; font-style:italic; margin-bottom:8px;">"' + m.pista + '"</p>' +
+        '<p style="font-size:13px; color:#444; margin-bottom:10px;">' + m.reto + '</p>' +
+        (hecha
+          ? '<p style="font-size:12px; color:#4c8c3c; font-weight:700;">+' + m.xp + ' XP conseguidos' + (m.fragmento ? ' · 💎 Fragmento' : '') + '</p>'
+          : '<button class="game-link-btn" onclick="completarMisionGuardianes(\'' + m.id + '\')">¡Hecho! (+' + m.xp + ' XP' + (m.fragmento ? ' + Fragmento' : '') + ')</button>');
+      cont.appendChild(card);
+    });
+  });
+}
+
 // ---- CALENDARIO ----
 var CAL_DATA = {"2026-07-27": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-28": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-29": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-30": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-31": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-01": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-02": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-03": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": true}, "2026-08-04": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": false}, "2026-08-05": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": false}, "2026-08-06": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-07": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-08": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-09": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-10": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-11": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-12": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-13": {"color": "green", "label": "Peñacoba", "has": true}, "2026-08-14": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-15": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-16": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-17": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-18": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-19": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-20": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-21": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-22": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-23": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-24": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-25": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-26": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-27": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-28": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-29": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-30": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-31": {"color": "green", "label": "Peñacoba", "has": false}};
 var calMonth = 6; // julio = 6 (0-indexado), agosto = 7
@@ -2524,6 +2753,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadTaskState();
   renderPresupuesto();
   renderComida();
+  renderGuardianes();
   initLightbox();
 });
 </script>
