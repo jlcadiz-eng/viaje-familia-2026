@@ -299,9 +299,34 @@
   .container-narrow { max-width: 560px; margin: 0 auto; padding: 18px 16px 60px; }
 
   .day-card-group { margin-bottom: 16px; }
+
+  /* LIGHTBOX: ver imagen a pantalla completa con zoom (entradas, QRs, confirmaciones) */
+  .lightbox-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.94);
+    z-index: 500; align-items: center; justify-content: center; touch-action: none;
+  }
+  .lightbox-overlay.active { display: flex; }
+  .lightbox-img-wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .lightbox-img { max-width: 92vw; max-height: 88vh; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .lightbox-close {
+    position: absolute; top: 16px; right: 16px; width: 42px; height: 42px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); color: #fff; border: none; font-size: 20px; z-index: 2;
+  }
+  .lightbox-hint {
+    position: absolute; bottom: 18px; left: 0; right: 0; text-align: center;
+    color: rgba(255,255,255,0.55); font-size: 12px;
+  }
+  img { cursor: zoom-in; }
 </style>
 </head>
 <body>
+<div class="lightbox-overlay" id="lightbox-overlay" onclick="lbBgClick(event)">
+  <button class="lightbox-close" onclick="closeLightbox(event)">✕</button>
+  <div class="lightbox-img-wrap">
+    <img class="lightbox-img" id="lightbox-img" src="" alt="Imagen ampliada">
+  </div>
+  <div class="lightbox-hint">Doble toque o pellizca para hacer zoom</div>
+</div>
 
 <!-- ============ PANTALLA 1: PORTADA ============ -->
 <div id="screen-portada" class="screen active" onclick="showScreen('menu')">
@@ -441,16 +466,16 @@
     <div class="day-header">
       <div class="day-number">S 1</div>
       <div>
-        <div class="day-title">Mercado Corçà + Mercado de Verano en Pals</div>
-        <div class="day-meta">Sábado 1 agosto · mercado vintage + mercado nocturno</div>
+        <div class="day-title">Desayuno Cal Sancho + playa + La Bisbal</div>
+        <div class="day-meta">Sábado 1 agosto · lo que hicisteis ✅</div>
       </div>
-      <div class="day-km">🛍️ Mercados</div>
+      <div class="day-km">🏖️ Playa</div>
     </div>
     <div class="day-body">
       <ul class="tip-list">
-        <li><strong>Mañana:</strong> Mercado de Corçà (vintage, todo el día) — libros, discos, ropa, objetos curiosos, ideal para curiosear con los niños</li>
-        <li><strong>Tarde-noche:</strong> Mercado de Verano en Pals</li>
-        <li>Si sigue la Fiesta Mayor de Pals (28 jul-5 ago), puede haber ambiente añadido esa noche en el pueblo</li>
+        <li>Desayuno en <strong>Cal Sancho</strong> (L'Armentera)</li>
+        <li>Playa de <strong>Sant Martí d'Empúries</strong></li>
+        <li>Paseo por <strong>La Bisbal d'Empordà</strong></li>
       </ul>
     </div>
   </div></div>
@@ -458,18 +483,37 @@
     <div class="day-header">
       <div class="day-number">D 2</div>
       <div>
-        <div class="day-title">Salida hacia Barcelona</div>
-        <div class="day-meta">Domingo 2 agosto · último chapuzón + vuelta</div>
+        <div class="day-title">Mercado de Verges + playa + vuelta a Barcelona</div>
+        <div class="day-meta">Domingo 2 agosto · lo que hicisteis ✅</div>
       </div>
       <div class="day-km">🚗 Salida</div>
     </div>
     <div class="day-body">
       <ul class="tip-list">
-        <li>Último chapuzón o desayuno tranquilo en la masía antes de salir</li>
-        <li>Salida hacia Barcelona (~1h30 desde el Empordà)</li>
+        <li><strong>Mercado de Brocanters</strong> de Verges (antigüedades)</li>
+        <li>Playa de <strong>Sant Martí d'Empúries</strong> (~5 horas)</li>
+        <li>Vuelta a Barcelona</li>
       </ul>
     </div>
   </div></div>
+<div style="display:none"><div class="day-card-group" id="day-2026-08-03"><div class="day-card">
+    <div class="day-header">
+      <div class="day-number">L 3</div>
+      <div>
+        <div class="day-title">Barcelona: gimnasio, coche y Decathlon</div>
+        <div class="day-meta">Lunes 3 agosto · lo que hicisteis ✅</div>
+      </div>
+      <div class="day-km">🏠 Barcelona</div>
+    </div>
+    <div class="day-body">
+      <ul class="tip-list">
+        <li>Gimnasio de <strong>Pepe</strong></li>
+        <li>Limpiar el coche con los niños</li>
+        <li>Gimnasio de <strong>Susana</strong></li>
+        <li><strong>Decathlon</strong> — zapatillas (bambas) de Pablo y de Pepe</li>
+      </ul>
+    </div>
+  </div></div></div>
 
   </div>
 </div>
@@ -573,18 +617,15 @@
     </div>
     <table class="budget-table" style="margin-top:10px;">
       <tr><td><strong>Louvre</strong> <span class="pill free">COMPRADO</span><br><span class="cat">Sábado 8/08 09:30 · 2 adultos 22€/u + Clara y Pablo gratis · pedido C261930003475</span></td><td class="amount">€44</td></tr>
-      <tr><td>Torres de Notre-Dame <span class="pill orange">PENDIENTE</span><br><span class="cat">2 adultos 16€/u + Clara y Pablo gratis (reserva obligatoria igualmente) · tickets.monuments-nationaux.fr</span></td><td class="amount">€32</td></tr>
       <tr><td>Sainte-Chapelle <span class="pill green">COMPRADO ✅</span><br><span class="cat">Sábado 8/08 16:00 · 2 adultos 16€/u + Clara y Pablo gratis · pedido 2619877812100442192</span></td><td class="amount">€32</td></tr>
       <tr><td>Torre Eiffel <span class="cat">— decidido no subir, solo desde fuera</span></td><td class="amount"><span class="pill free">€0</span></td></tr>
+      <tr><td>Torres de Notre-Dame <span class="cat">— decidido no subir ("es una matada"), solo se visita la catedral gratis el domingo</span></td><td class="amount"><span class="pill free">€0</span></td></tr>
       <tr><td>Notre-Dame (catedral) <span class="cat">reserva de franja gratuita</span></td><td class="amount"><span class="pill free">€0</span></td></tr>
       <tr><td>Museo Orsay <span class="pill blue">PROBABLE</span><br><span class="cat">2 adultos ~16€/u, no seguro que entréis</span></td><td class="amount">~€32</td></tr>
       <tr><td>Metro/RER 4 personas × 3 días</td><td class="amount">~€70</td></tr>
     </table>
-    <div class="warn-box" style="margin-top:10px;">
-      🏔️ <strong>Torres de Notre-Dame:</strong> 424 escalones, 69 m, sin ascensor, subida física exigente — máximo 5 min arriba. Reservar cuanto antes en tickets.monuments-nationaux.fr, no se vende en taquilla. Movidas al domingo 9 por la mañana (franja 9:00-11:00), antes del resto del plan de ese día.
-    </div>
     <div class="heat-box" style="margin-top:8px;">
-      ✅ Reservas pendientes: Notre-Dame torres, Notre-Dame catedral (franja gratuita), Museo Orsay (si al final entráis). Sainte-Chapelle ya comprada ✅. Entradas Louvre ya en el bolsillo — imágenes guardadas abajo.
+      ✅ Reservas pendientes: Notre-Dame catedral (franja gratuita), Museo Orsay (si al final entráis). Sainte-Chapelle ya comprada ✅. Entradas Louvre ya en el bolsillo — imágenes guardadas abajo.
     </div>
     <div class="highlight-box" style="margin-top:8px;">
       <strong>⛪ Sainte-Chapelle — COMPRADO ✅</strong>
@@ -656,7 +697,7 @@
         </div>
         <div class="timeline-row">
           <div class="time-badge">18:00</div>
-          <div class="timeline-text"><strong>Place du Tertre</strong> (plaza de los pintores) <span class="sub">uno de los "3 básicos" de Montmartre según los guías locales</span></div>
+          <div class="timeline-text"><strong>Place du Tertre</strong> (plaza de los pintores) <span class="sub">uno de los "3 básicos" de Montmartre según los guías locales · 🛸 hay un Space Invader pequeño con forma de artista, entre los pintores</span></div>
         </div>
         <div class="timeline-row">
           <div class="time-badge">18:15</div>
@@ -701,22 +742,18 @@
       <div class="day-number">S 8</div>
       <div>
         <div class="day-title">París · Louvre, Île de la Cité y Barrio Latino</div>
-        <div class="day-meta">Sábado 8 · Louvre · Sainte-Chapelle · Notre-Dame · Panthéon · Saint-Germain-des-Prés</div>
+        <div class="day-meta">Sábado 8 · Louvre · Panthéon · Sainte-Chapelle · bouquinistes · Saint-Germain</div>
       </div>
       <div class="day-km">🚇 Metro/RER</div>
     </div>
     <div class="day-body">
       <ul class="tip-list">
         <li><strong>Mañana:</strong> Louvre a primera hora (reserva obligatoria incluso para menores gratis) + paseo corto por el Jardín de las Tullerías</li>
-        <li><strong>Île de la Cité:</strong> Sainte-Chapelle a las 16:00 (vidrieras, entradas ya compradas ✅) y Notre-Dame (gratuita, franja recomendada)</li>
-        <li>Cruzando el puente: <strong>Librería Shakespeare & Co</strong>, justo enfrente de Notre-Dame</li>
-        <li><strong>Barrio Latino:</strong> Panthéon y Rue Mouffetard (calle con mercado y ambiente)</li>
-        <li><strong>Saint-Germain-des-Prés:</strong> Iglesia Saint-Sulpice, el barrio de Saint-Germain y cierre tranquilo en los Jardines de Luxemburgo</li>
+        <li><strong>Barrio Latino:</strong> comida + Panthéon + Rue Mouffetard + Saint-Sulpice/Saint-Germain, todo antes de volver a la isla</li>
+        <li><strong>Île de la Cité:</strong> Sainte-Chapelle a las 16:00 (vidrieras, entradas ya compradas ✅), Shakespeare & Co, paseo por los bouquinistes del Quai de Montebello y helado en Berthillon</li>
+        <li>No se sube a las Torres de Notre-Dame (decidido no hacerlo) — la catedral (gratis) se visita el domingo a primera hora</li>
         <li>Menores de 18 años: <strong>GRATIS en el Louvre</strong></li>
       </ul>
-      <div class="warn-box">
-        ⚠️ Cambiado de domingo a sábado: Notre-Dame los domingos tiene muchísima más afluencia — mejor visitarla en sábado.
-      </div>
       <div class="card" style="margin-top:14px;">
         <div class="card-title">🌅 Guía horaria · Sábado 8 completo</div>
         <div class="timeline-row">
@@ -732,19 +769,27 @@
           <div class="timeline-text">Salida y paseo corto por el <strong>Jardín de las Tullerías</strong> <span class="sub">15-20 min, de camino hacia el río</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">12:30</div>
-          <div class="timeline-text"><strong>Comida</strong> en la zona de Palais Royal o cruzando hacia la Cité</div>
+          <div class="time-badge">12:20</div>
+          <div class="timeline-text">Cruzar hacia el <strong>Barrio Latino</strong> <span class="sub">~20-25 min andando desde el Louvre/Tuileries</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">13:30</div>
-          <div class="timeline-text"><strong>Catedral de Notre-Dame</strong> (interior gratuito) <span class="sub">~45 min. Franja recomendada: primera media hora tras la apertura suele estar más tranquila</span></div>
+          <div class="time-badge">13:00</div>
+          <div class="timeline-text"><strong>Comida</strong> en la zona de Mouffetard <span class="sub">opciones: Les Fous de l'Île o La Bûcherie (junto a Berthillon, para más tarde) — o algo rápido tipo Au P'tit Grec si preferís comer ya cerca del Panthéon</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">14:15</div>
-          <div class="timeline-text"><strong>Île Saint-Louis</strong> — helado en <strong>Berthillon</strong> y paseo junto al Sena <span class="sub">institución parisina desde 1954, sorbetes de fruta — la isla vecina a Notre-Dame, 5 min andando</span></div>
+          <div class="time-badge">13:45</div>
+          <div class="timeline-text"><strong>Panthéon</strong> <span class="sub">13€/adulto, gratis menores de 18 · abierto hasta 18:30 · 🛸 dos Space Invaders (PA-03 y PA-04) en Rue de la Montagne Sainte-Geneviève, la calle que sube al Panthéon</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">15:15</div>
+          <div class="time-badge">14:30</div>
+          <div class="timeline-text">Paseo por <strong>Rue Mouffetard</strong> <span class="sub">calle con mercado y ambiente, muy cerca del Panthéon</span></div>
+        </div>
+        <div class="timeline-row">
+          <div class="time-badge">15:00</div>
+          <div class="timeline-text">Iglesia <strong>Saint-Sulpice</strong> y paseo corto por <strong>Saint-Germain-des-Prés</strong> <span class="sub">Jardines de Luxemburgo si da tiempo, está al lado</span></div>
+        </div>
+        <div class="timeline-row">
+          <div class="time-badge">15:45</div>
           <div class="timeline-text">Vuelta hacia <strong>Sainte-Chapelle</strong> <span class="sub">contar con cola de seguridad — llegar con margen antes de las 16:00</span></div>
         </div>
         <div class="timeline-row">
@@ -753,27 +798,15 @@
         </div>
         <div class="timeline-row">
           <div class="time-badge">16:45</div>
-          <div class="timeline-text">Cruzando el puente: <strong>Librería Shakespeare & Co</strong> <span class="sub">justo enfrente de Notre-Dame, abierta hasta las 22:00</span></div>
+          <div class="timeline-text">Cruzando el puente: <strong>Librería Shakespeare & Co</strong> y paseo por los <strong>bouquinistes</strong> del Quai de Montebello <span class="sub">los puestos verdes de libros de segunda mano junto al Sena, justo aquí — librería abierta hasta las 22:00 · 🛸 Space Invader con forma de cactus (PA_1200)</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">17:15</div>
-          <div class="timeline-text"><strong>Panthéon</strong> <span class="sub">~15-20 min andando por el Barrio Latino · 13€/adulto, gratis menores de 18 · abierto hasta 18:30</span></div>
-        </div>
-        <div class="timeline-row">
-          <div class="time-badge">18:00</div>
-          <div class="timeline-text">Paseo por <strong>Rue Mouffetard</strong> <span class="sub">calle con mercado y ambiente, muy cerca del Panthéon</span></div>
+          <div class="time-badge">17:30</div>
+          <div class="timeline-text"><strong>Île Saint-Louis</strong> — helado en <strong>Berthillon</strong> y paseo junto al Sena <span class="sub">institución parisina desde 1954, sorbetes de fruta</span></div>
         </div>
         <div class="timeline-row">
           <div class="time-badge">18:30</div>
-          <div class="timeline-text"><strong>Jardines de Luxemburgo</strong> <span class="sub">descanso, veleros de juguete para los niños si hay tiempo · gratuito · cierra a las 21:00</span></div>
-        </div>
-        <div class="timeline-row">
-          <div class="time-badge">19:30</div>
-          <div class="timeline-text">Iglesia <strong>Saint-Sulpice</strong> y paseo por <strong>Saint-Germain-des-Prés</strong></div>
-        </div>
-        <div class="timeline-row">
-          <div class="time-badge">20:15</div>
-          <div class="timeline-text"><strong>Cena</strong> en Saint-Germain <span class="sub">vuelta al hotel: ~20-25 min (L4 → Châtelet → transbordo L11 → République), o taxi si vais cansados</span></div>
+          <div class="timeline-text"><strong>Cena</strong> cerca de la isla (Île Saint-Louis o Marais) <span class="sub">sin volver a cruzar hacia Saint-Germain — vuelta al hotel: ~15-20 min (L4 → Châtelet → transbordo L11 → République), o taxi si vais cansados</span></div>
         </div>
         <div class="heat-box" style="margin-top:10px;">
           💡 Estructura confirmada por guías locales de Instagram (@lafabricaparis, "París en 3 días"): Île de la Cité + Louvre por la mañana y Barrio Latino/Saint-Germain por la tarde es exactamente su "Día 1: el corazón clásico". Berthillon en Île Saint-Louis es su heladería de referencia en esta zona.
@@ -801,13 +834,13 @@
       <div class="day-number">D 9</div>
       <div>
         <div class="day-title">París · Champs-Élysées, Orsay y Torre Eiffel</div>
-        <div class="day-meta">Domingo 9 · Torres de Notre-Dame (9:00-11:00) · Arco de Triunfo · Concordia · Museo Orsay · Trocadéro · Torre Eiffel · crucero por el Sena</div>
+        <div class="day-meta">Domingo 9 · Catedral Notre-Dame (8:15) · Arco de Triunfo · Concordia · Museo Orsay · Trocadéro · Torre Eiffel · crucero por el Sena</div>
       </div>
       <div class="day-km">🚇 Metro/RER</div>
     </div>
     <div class="day-body">
       <ul class="tip-list">
-        <li><strong>9:00-11:00 — Torres de Notre-Dame</strong> (franja reservada, movidas del sábado): 424 escalones, 69 m, sin ascensor, máximo 5 min arriba — 16€/adulto, menores gratis, reserva obligatoria en tickets.monuments-nationaux.fr</li>
+        <li><strong>8:15-8:55 — Catedral de Notre-Dame</strong> (interior gratuito): franja tranquila nada más abrir · reserva opcional en resa.notredamedeparis.fr (se abre 72h antes) para reducir la cola · 🛸 Space Invader de murciélagos en la fachada</li>
         <li><strong>Después:</strong> Arco de Triunfo (subida opcional al mirador), paseo por los Campos Elíseos y Place de la Concordia</li>
         <li><strong>Museo Orsay</strong> (reserva de franja horaria obligatoria, probable): cruzando el Sena desde la Concordia, a 5-10 min a pie — encaja de camino hacia Trocadéro</li>
         <li><strong>Trocadéro:</strong> las mejores vistas y fotos de la Torre Eiffel — foto de la torre entera desde los jardines</li>
@@ -821,44 +854,44 @@
       <div class="card" style="margin-top:14px;">
         <div class="card-title">🌅 Guía horaria · Domingo 9 completo</div>
         <div class="timeline-row">
-          <div class="time-badge">08:40</div>
+          <div class="time-badge">08:15</div>
           <div class="timeline-text">Salida del hotel hacia Notre-Dame <span class="sub">Metro République → L11 a Châtelet → L4 a Cité, ~15 min puerta a puerta</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">09:00</div>
-          <div class="timeline-text"><strong>Torres de Notre-Dame</strong> <span class="sub">424 escalones, sin ascensor, máx. 5 min arriba — franja reservada 9:00-11:00, pendiente de comprar en tickets.monuments-nationaux.fr</span></div>
+          <div class="time-badge">08:35</div>
+          <div class="timeline-text"><strong>Catedral de Notre-Dame</strong> (interior gratuito) <span class="sub">~40 min · franja tranquila nada más abrir · reserva opcional en resa.notredamedeparis.fr (se abre 72h antes) · 🛸 Space Invader de murciélagos en la fachada</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">11:15</div>
+          <div class="time-badge">09:15</div>
           <div class="timeline-text">Metro hacia el <strong>Arco de Triunfo</strong> <span class="sub">~25-30 min con transbordo</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">11:45</div>
+          <div class="time-badge">09:45</div>
           <div class="timeline-text"><strong>Arco de Triunfo</strong> (subida al mirador opcional) y paseo por los <strong>Campos Elíseos</strong></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">12:30</div>
-          <div class="timeline-text"><strong>Comida</strong> en los Campos Elíseos o cerca de la Concordia</div>
-        </div>
-        <div class="timeline-row">
-          <div class="time-badge">13:30</div>
+          <div class="time-badge">10:45</div>
           <div class="timeline-text"><strong>Place de la Concordia</strong></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">14:00</div>
-          <div class="timeline-text"><strong>Museo Orsay</strong> <span class="sub">cruzando el Sena desde la Concordia, 5-10 min andando · 16€/adulto, gratis menores de 18 · ~1,5-2h</span></div>
+          <div class="time-badge">11:15</div>
+          <div class="timeline-text"><strong>Museo Orsay</strong> <span class="sub">cruzando el Sena desde la Concordia, 5-10 min andando · 16€/adulto, gratis menores de 18 · ~1,5-2h — ir ahora evita las colas de mediodía</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">16:00</div>
+          <div class="time-badge">13:00</div>
+          <div class="timeline-text"><strong>Comida</strong> cerca de Orsay/Saint-Germain</div>
+        </div>
+        <div class="timeline-row">
+          <div class="time-badge">14:00</div>
           <div class="timeline-text">Metro/RER hacia <strong>Trocadéro</strong></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">16:30</div>
+          <div class="time-badge">14:30</div>
           <div class="timeline-text"><strong>Trocadéro</strong> <span class="sub">las mejores vistas y fotos de la Torre Eiffel entera, desde los jardines</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">17:00</div>
-          <div class="timeline-text">Tiempo libre en el <strong>Champ de Mars</strong> <span class="sub">descanso, heladería — margen antes de la hora de la torre</span></div>
+          <div class="time-badge">15:00</div>
+          <div class="timeline-text">Tiempo libre en el <strong>Champ de Mars</strong> <span class="sub">descanso largo, heladería — mucho margen antes de la torre gracias a empezar el día más pronto</span></div>
         </div>
         <div class="timeline-row">
           <div class="time-badge">19:00</div>
@@ -1028,7 +1061,7 @@
         </div>
         <div class="timeline-row">
           <div class="time-badge">18:00</div>
-          <div class="timeline-text"><strong>Place du Tertre</strong> (plaza de los pintores) <span class="sub">uno de los "3 básicos" de Montmartre según los guías locales</span></div>
+          <div class="timeline-text"><strong>Place du Tertre</strong> (plaza de los pintores) <span class="sub">uno de los "3 básicos" de Montmartre según los guías locales · 🛸 hay un Space Invader pequeño con forma de artista, entre los pintores</span></div>
         </div>
         <div class="timeline-row">
           <div class="time-badge">18:15</div>
@@ -1071,22 +1104,18 @@
       <div class="day-number">S 8</div>
       <div>
         <div class="day-title">París · Louvre, Île de la Cité y Barrio Latino</div>
-        <div class="day-meta">Sábado 8 · Louvre · Sainte-Chapelle · Notre-Dame · Panthéon · Saint-Germain-des-Prés</div>
+        <div class="day-meta">Sábado 8 · Louvre · Panthéon · Sainte-Chapelle · bouquinistes · Saint-Germain</div>
       </div>
       <div class="day-km">🚇 Metro/RER</div>
     </div>
     <div class="day-body">
       <ul class="tip-list">
         <li><strong>Mañana:</strong> Louvre a primera hora (reserva obligatoria incluso para menores gratis) + paseo corto por el Jardín de las Tullerías</li>
-        <li><strong>Île de la Cité:</strong> Sainte-Chapelle a las 16:00 (vidrieras, entradas ya compradas ✅) y Notre-Dame (gratuita, franja recomendada)</li>
-        <li>Cruzando el puente: <strong>Librería Shakespeare & Co</strong>, justo enfrente de Notre-Dame</li>
-        <li><strong>Barrio Latino:</strong> Panthéon y Rue Mouffetard (calle con mercado y ambiente)</li>
-        <li><strong>Saint-Germain-des-Prés:</strong> Iglesia Saint-Sulpice, el barrio de Saint-Germain y cierre tranquilo en los Jardines de Luxemburgo</li>
+        <li><strong>Barrio Latino:</strong> comida + Panthéon + Rue Mouffetard + Saint-Sulpice/Saint-Germain, todo antes de volver a la isla</li>
+        <li><strong>Île de la Cité:</strong> Sainte-Chapelle a las 16:00 (vidrieras, entradas ya compradas ✅), Shakespeare & Co, paseo por los bouquinistes del Quai de Montebello y helado en Berthillon</li>
+        <li>No se sube a las Torres de Notre-Dame (decidido no hacerlo) — la catedral (gratis) se visita el domingo a primera hora</li>
         <li>Menores de 18 años: <strong>GRATIS en el Louvre</strong></li>
       </ul>
-      <div class="warn-box">
-        ⚠️ Cambiado de domingo a sábado: Notre-Dame los domingos tiene muchísima más afluencia — mejor visitarla en sábado.
-      </div>
       <div class="card" style="margin-top:14px;">
         <div class="card-title">🌅 Guía horaria · Sábado 8 completo</div>
         <div class="timeline-row">
@@ -1102,19 +1131,27 @@
           <div class="timeline-text">Salida y paseo corto por el <strong>Jardín de las Tullerías</strong> <span class="sub">15-20 min, de camino hacia el río</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">12:30</div>
-          <div class="timeline-text"><strong>Comida</strong> en la zona de Palais Royal o cruzando hacia la Cité</div>
+          <div class="time-badge">12:20</div>
+          <div class="timeline-text">Cruzar hacia el <strong>Barrio Latino</strong> <span class="sub">~20-25 min andando desde el Louvre/Tuileries</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">13:30</div>
-          <div class="timeline-text"><strong>Catedral de Notre-Dame</strong> (interior gratuito) <span class="sub">~45 min. Franja recomendada: primera media hora tras la apertura suele estar más tranquila</span></div>
+          <div class="time-badge">13:00</div>
+          <div class="timeline-text"><strong>Comida</strong> en la zona de Mouffetard <span class="sub">opciones: Les Fous de l'Île o La Bûcherie (junto a Berthillon, para más tarde) — o algo rápido tipo Au P'tit Grec si preferís comer ya cerca del Panthéon</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">14:15</div>
-          <div class="timeline-text"><strong>Île Saint-Louis</strong> — helado en <strong>Berthillon</strong> y paseo junto al Sena <span class="sub">institución parisina desde 1954, sorbetes de fruta — la isla vecina a Notre-Dame, 5 min andando</span></div>
+          <div class="time-badge">13:45</div>
+          <div class="timeline-text"><strong>Panthéon</strong> <span class="sub">13€/adulto, gratis menores de 18 · abierto hasta 18:30 · 🛸 dos Space Invaders (PA-03 y PA-04) en Rue de la Montagne Sainte-Geneviève, la calle que sube al Panthéon</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">15:15</div>
+          <div class="time-badge">14:30</div>
+          <div class="timeline-text">Paseo por <strong>Rue Mouffetard</strong> <span class="sub">calle con mercado y ambiente, muy cerca del Panthéon</span></div>
+        </div>
+        <div class="timeline-row">
+          <div class="time-badge">15:00</div>
+          <div class="timeline-text">Iglesia <strong>Saint-Sulpice</strong> y paseo corto por <strong>Saint-Germain-des-Prés</strong> <span class="sub">Jardines de Luxemburgo si da tiempo, está al lado</span></div>
+        </div>
+        <div class="timeline-row">
+          <div class="time-badge">15:45</div>
           <div class="timeline-text">Vuelta hacia <strong>Sainte-Chapelle</strong> <span class="sub">contar con cola de seguridad — llegar con margen antes de las 16:00</span></div>
         </div>
         <div class="timeline-row">
@@ -1123,27 +1160,15 @@
         </div>
         <div class="timeline-row">
           <div class="time-badge">16:45</div>
-          <div class="timeline-text">Cruzando el puente: <strong>Librería Shakespeare & Co</strong> <span class="sub">justo enfrente de Notre-Dame, abierta hasta las 22:00</span></div>
+          <div class="timeline-text">Cruzando el puente: <strong>Librería Shakespeare & Co</strong> y paseo por los <strong>bouquinistes</strong> del Quai de Montebello <span class="sub">los puestos verdes de libros de segunda mano junto al Sena, justo aquí — librería abierta hasta las 22:00 · 🛸 Space Invader con forma de cactus (PA_1200)</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">17:15</div>
-          <div class="timeline-text"><strong>Panthéon</strong> <span class="sub">~15-20 min andando por el Barrio Latino · 13€/adulto, gratis menores de 18 · abierto hasta 18:30</span></div>
-        </div>
-        <div class="timeline-row">
-          <div class="time-badge">18:00</div>
-          <div class="timeline-text">Paseo por <strong>Rue Mouffetard</strong> <span class="sub">calle con mercado y ambiente, muy cerca del Panthéon</span></div>
+          <div class="time-badge">17:30</div>
+          <div class="timeline-text"><strong>Île Saint-Louis</strong> — helado en <strong>Berthillon</strong> y paseo junto al Sena <span class="sub">institución parisina desde 1954, sorbetes de fruta</span></div>
         </div>
         <div class="timeline-row">
           <div class="time-badge">18:30</div>
-          <div class="timeline-text"><strong>Jardines de Luxemburgo</strong> <span class="sub">descanso, veleros de juguete para los niños si hay tiempo · gratuito · cierra a las 21:00</span></div>
-        </div>
-        <div class="timeline-row">
-          <div class="time-badge">19:30</div>
-          <div class="timeline-text">Iglesia <strong>Saint-Sulpice</strong> y paseo por <strong>Saint-Germain-des-Prés</strong></div>
-        </div>
-        <div class="timeline-row">
-          <div class="time-badge">20:15</div>
-          <div class="timeline-text"><strong>Cena</strong> en Saint-Germain <span class="sub">vuelta al hotel: ~20-25 min (L4 → Châtelet → transbordo L11 → République), o taxi si vais cansados</span></div>
+          <div class="timeline-text"><strong>Cena</strong> cerca de la isla (Île Saint-Louis o Marais) <span class="sub">sin volver a cruzar hacia Saint-Germain — vuelta al hotel: ~15-20 min (L4 → Châtelet → transbordo L11 → République), o taxi si vais cansados</span></div>
         </div>
         <div class="heat-box" style="margin-top:10px;">
           💡 Estructura confirmada por guías locales de Instagram (@lafabricaparis, "París en 3 días"): Île de la Cité + Louvre por la mañana y Barrio Latino/Saint-Germain por la tarde es exactamente su "Día 1: el corazón clásico". Berthillon en Île Saint-Louis es su heladería de referencia en esta zona.
@@ -1182,13 +1207,13 @@
       <div class="day-number">D 9</div>
       <div>
         <div class="day-title">París · Champs-Élysées, Orsay y Torre Eiffel</div>
-        <div class="day-meta">Domingo 9 · Torres de Notre-Dame (9:00-11:00) · Arco de Triunfo · Concordia · Museo Orsay · Trocadéro · Torre Eiffel · crucero por el Sena</div>
+        <div class="day-meta">Domingo 9 · Catedral Notre-Dame (8:15) · Arco de Triunfo · Concordia · Museo Orsay · Trocadéro · Torre Eiffel · crucero por el Sena</div>
       </div>
       <div class="day-km">🚇 Metro/RER</div>
     </div>
     <div class="day-body">
       <ul class="tip-list">
-        <li><strong>9:00-11:00 — Torres de Notre-Dame</strong> (franja reservada, movidas del sábado): 424 escalones, 69 m, sin ascensor, máximo 5 min arriba — 16€/adulto, menores gratis, reserva obligatoria en tickets.monuments-nationaux.fr</li>
+        <li><strong>8:15-8:55 — Catedral de Notre-Dame</strong> (interior gratuito): franja tranquila nada más abrir · reserva opcional en resa.notredamedeparis.fr (se abre 72h antes) para reducir la cola · 🛸 Space Invader de murciélagos en la fachada</li>
         <li><strong>Después:</strong> Arco de Triunfo (subida opcional al mirador), paseo por los Campos Elíseos y Place de la Concordia</li>
         <li><strong>Museo Orsay</strong> (reserva de franja horaria obligatoria, probable): cruzando el Sena desde la Concordia, a 5-10 min a pie — encaja de camino hacia Trocadéro</li>
         <li><strong>Trocadéro:</strong> las mejores vistas y fotos de la Torre Eiffel — foto de la torre entera desde los jardines</li>
@@ -1202,44 +1227,44 @@
       <div class="card" style="margin-top:14px;">
         <div class="card-title">🌅 Guía horaria · Domingo 9 completo</div>
         <div class="timeline-row">
-          <div class="time-badge">08:40</div>
+          <div class="time-badge">08:15</div>
           <div class="timeline-text">Salida del hotel hacia Notre-Dame <span class="sub">Metro République → L11 a Châtelet → L4 a Cité, ~15 min puerta a puerta</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">09:00</div>
-          <div class="timeline-text"><strong>Torres de Notre-Dame</strong> <span class="sub">424 escalones, sin ascensor, máx. 5 min arriba — franja reservada 9:00-11:00, pendiente de comprar en tickets.monuments-nationaux.fr</span></div>
+          <div class="time-badge">08:35</div>
+          <div class="timeline-text"><strong>Catedral de Notre-Dame</strong> (interior gratuito) <span class="sub">~40 min · franja tranquila nada más abrir · reserva opcional en resa.notredamedeparis.fr (se abre 72h antes) · 🛸 Space Invader de murciélagos en la fachada</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">11:15</div>
+          <div class="time-badge">09:15</div>
           <div class="timeline-text">Metro hacia el <strong>Arco de Triunfo</strong> <span class="sub">~25-30 min con transbordo</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">11:45</div>
+          <div class="time-badge">09:45</div>
           <div class="timeline-text"><strong>Arco de Triunfo</strong> (subida al mirador opcional) y paseo por los <strong>Campos Elíseos</strong></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">12:30</div>
-          <div class="timeline-text"><strong>Comida</strong> en los Campos Elíseos o cerca de la Concordia</div>
-        </div>
-        <div class="timeline-row">
-          <div class="time-badge">13:30</div>
+          <div class="time-badge">10:45</div>
           <div class="timeline-text"><strong>Place de la Concordia</strong></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">14:00</div>
-          <div class="timeline-text"><strong>Museo Orsay</strong> <span class="sub">cruzando el Sena desde la Concordia, 5-10 min andando · 16€/adulto, gratis menores de 18 · ~1,5-2h</span></div>
+          <div class="time-badge">11:15</div>
+          <div class="timeline-text"><strong>Museo Orsay</strong> <span class="sub">cruzando el Sena desde la Concordia, 5-10 min andando · 16€/adulto, gratis menores de 18 · ~1,5-2h — ir ahora evita las colas de mediodía</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">16:00</div>
+          <div class="time-badge">13:00</div>
+          <div class="timeline-text"><strong>Comida</strong> cerca de Orsay/Saint-Germain</div>
+        </div>
+        <div class="timeline-row">
+          <div class="time-badge">14:00</div>
           <div class="timeline-text">Metro/RER hacia <strong>Trocadéro</strong></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">16:30</div>
+          <div class="time-badge">14:30</div>
           <div class="timeline-text"><strong>Trocadéro</strong> <span class="sub">las mejores vistas y fotos de la Torre Eiffel entera, desde los jardines</span></div>
         </div>
         <div class="timeline-row">
-          <div class="time-badge">17:00</div>
-          <div class="timeline-text">Tiempo libre en el <strong>Champ de Mars</strong> <span class="sub">descanso, heladería — margen antes de la hora de la torre</span></div>
+          <div class="time-badge">15:00</div>
+          <div class="timeline-text">Tiempo libre en el <strong>Champ de Mars</strong> <span class="sub">descanso largo, heladería — mucho margen antes de la torre gracias a empezar el día más pronto</span></div>
         </div>
         <div class="timeline-row">
           <div class="time-badge">19:00</div>
@@ -1962,7 +1987,7 @@
       </tbody>
     </table>
     <div class="highlight-box" style="margin-top:14px;">
-      💳 Con el coche nuevo, valorad contratar telepeaje compatible con Francia (VIA-T con cobertura Francia o Ulys/Liber-T): evita colas en las cabinas, que en agosto pueden ser largas.
+      💳 Decidido: sin telepeaje propio — todos los peajes de Francia se pagan con tarjeta en cabina.
     </div>
   </div>
 
@@ -2021,16 +2046,12 @@
       <span class="t-val">~€70</span>
     </div>
     <div class="total-line">
-      <span class="t-label">🏔️ Torres de Notre-Dame (est.)</span>
-      <span class="t-val">€32</span>
-    </div>
-    <div class="total-line">
       <span class="t-label">🎒 Varios: parking, snacks, extras (est.)</span>
       <span class="t-val">~€215</span>
     </div>
     <div class="grand-total" style="padding-top:12px; margin-top:8px;">
       <div><div class="label">Subtotal pendiente</div></div>
-      <div class="amount" style="font-size:22px;">~€863</div>
+      <div class="amount" style="font-size:22px;">~€831</div>
     </div>
 
     <h3 style="margin-top:28px;">⚪ Probable <span style="font-weight:400; color:#a8c9a0; text-transform:none; letter-spacing:0;">(no seguro que se haga)</span></h3>
@@ -2045,9 +2066,9 @@
     <div class="grand-total">
       <div>
         <div class="label">TOTAL GENERAL (confirmado + pendiente + probable)</div>
-        <div class="per-person">~€794 por persona · incluye Mas Pareta · no incluye comidas</div>
+        <div class="per-person">~€786 por persona · incluye Mas Pareta · no incluye comidas</div>
       </div>
-      <div class="amount">~€3.174,68</div>
+      <div class="amount">~€3.142,68</div>
     </div>
   </div>
 
@@ -2150,10 +2171,10 @@
   <div class="container-narrow">
     <div class="section-title">Mas Pareta — pendientes de la semana 1</div>
 <div class="card"><ul style="list-style:none;">
-<li class="task-item " data-task-id="mp-0"><input type="checkbox" id="cb-mp-0"  onchange="toggleTask(&#39;mp-0&#39;, this)"><label for="cb-mp-0">Fiesta Mayor de Pals confirmada 28 jul-5 ago — revisar programa detallado (Cantada d'Habaneres, Xtreme Pals) más cerca del viaje en visitpals.com</label></li>
-<li class="task-item " data-task-id="mp-1"><input type="checkbox" id="cb-mp-1"  onchange="toggleTask(&#39;mp-1&#39;, this)"><label for="cb-mp-1">Reserva Kayak del Ter (Colomers) para el viernes 31 → llamar/escribir con antelación, imprescindible saber nadar</label></li>
-<li class="task-item " data-task-id="mp-2"><input type="checkbox" id="cb-mp-2"  onchange="toggleTask(&#39;mp-2&#39;, this)"><label for="cb-mp-2">Confirmar horario y ubicación exacta de "Xtreme Pals" (inflable) del 30 jul</label></li>
-<li class="task-item " data-task-id="mp-3"><input type="checkbox" id="cb-mp-3"  onchange="toggleTask(&#39;mp-3&#39;, this)"><label for="cb-mp-3">Confirmar horario y ubicación exacta de la Cantada d'Habaneres del 30 jul</label></li>
+<li class="task-item checked" data-task-id="mp-0"><input type="checkbox" id="cb-mp-0" checked onchange="toggleTask(&#39;mp-0&#39;, this)"><label for="cb-mp-0">Fiesta Mayor de Pals confirmada 28 jul-5 ago — revisar programa detallado (Cantada d'Habaneres, Xtreme Pals) más cerca del viaje en visitpals.com</label></li>
+<li class="task-item checked" data-task-id="mp-1"><input type="checkbox" id="cb-mp-1" checked onchange="toggleTask(&#39;mp-1&#39;, this)"><label for="cb-mp-1">Reserva Kayak del Ter (Colomers) para el viernes 31 → llamar/escribir con antelación, imprescindible saber nadar</label></li>
+<li class="task-item checked" data-task-id="mp-2"><input type="checkbox" id="cb-mp-2" checked onchange="toggleTask(&#39;mp-2&#39;, this)"><label for="cb-mp-2">Confirmar horario y ubicación exacta de "Xtreme Pals" (inflable) del 30 jul</label></li>
+<li class="task-item checked" data-task-id="mp-3"><input type="checkbox" id="cb-mp-3" checked onchange="toggleTask(&#39;mp-3&#39;, this)"><label for="cb-mp-3">Confirmar horario y ubicación exacta de la Cantada d'Habaneres del 30 jul</label></li>
 </ul></div>
 <div class="section-title">Documentación, coche y seguridad vial</div>
 <div class="card"><ul style="list-style:none;">
@@ -2165,19 +2186,19 @@
 <li class="task-item checked" data-task-id="doc-5"><input type="checkbox" id="cb-doc-5" checked onchange="toggleTask(&#39;doc-5&#39;, this)"><label for="cb-doc-5"><strong>Etiqueta DGT CERO/ECO:</strong> conseguida ✔ ya en posesión de Pepe</label></li>
 <li class="task-item checked" data-task-id="doc-6"><input type="checkbox" id="cb-doc-6" checked onchange="toggleTask(&#39;doc-6&#39;, this)"><label for="cb-doc-6"><strong>Triángulos + chalecos + baliza V-16</strong> listos en el coche</label></li>
 <li class="task-item checked" data-task-id="doc-7"><input type="checkbox" id="cb-doc-7" checked onchange="toggleTask(&#39;doc-7&#39;, this)"><label for="cb-doc-7"><strong>Seguro del coche:</strong> confirmado — cubre hasta Francia ✔</label></li>
-<li class="task-item " data-task-id="doc-8"><input type="checkbox" id="cb-doc-8"  onchange="toggleTask(&#39;doc-8&#39;, this)"><label for="cb-doc-8"><strong>Telepeaje:</strong> NO se usará el Via-T de la empresa para Francia — pendiente contratar telepeaje propio (Via-T personal, Bip&Go, Emovis...) o pagar en efectivo/tarjeta en cabina</label></li>
+<li class="task-item checked" data-task-id="doc-8"><input type="checkbox" id="cb-doc-8" checked onchange="toggleTask(&#39;doc-8&#39;, this)"><label for="cb-doc-8"><strong>Telepeaje:</strong> decidido — sin telepeaje propio, todos los peajes de Francia se pagan con tarjeta en cabina</label></li>
 <li class="task-item checked" data-task-id="doc-9"><input type="checkbox" id="cb-doc-9" checked onchange="toggleTask(&#39;doc-9&#39;, this)"><label for="cb-doc-9"><strong>Cable de carga del PHEV</strong> en el maletero — toma de carga confirmada en el hotel de Futuroscope (2 cargadores PHEV 22kW)</label></li>
 <li class="task-item " data-task-id="doc-10"><input type="checkbox" id="cb-doc-10"  onchange="toggleTask(&#39;doc-10&#39;, this)"><label for="cb-doc-10"><strong>Reservar hotel en Burdeos</strong> (1 noche, 4 personas, confirmar A/C)</label></li>
-<li class="task-item " data-task-id="doc-11"><input type="checkbox" id="cb-doc-11"  onchange="toggleTask(&#39;doc-11&#39;, this)"><label for="cb-doc-11"><strong>Comprar entradas Torres de Notre-Dame</strong> (domingo 9 ago, franja 9:00-11:00, tickets.monuments-nationaux.fr)</label></li>
 <li class="task-item " data-task-id="doc-12"><input type="checkbox" id="cb-doc-12"  onchange="toggleTask(&#39;doc-12&#39;, this)"><label for="cb-doc-12"><strong>Reservar franja gratuita de la catedral Notre-Dame</strong> en resa.notredamedeparis.fr (se abre 2-3 días antes de la visita — hacerlo ya en agosto)</label></li>
 <li class="task-item " data-task-id="doc-13"><input type="checkbox" id="cb-doc-13"  onchange="toggleTask(&#39;doc-13&#39;, this)"><label for="cb-doc-13"><strong>Decidir y comprar entrada Museo Orsay</strong> si finalmente vais (aún probable)</label></li>
 </ul></div>
 <div class="section-title">Preparativos generales de casa y viaje</div>
 <div class="card"><ul style="list-style:none;">
 <li class="task-item " data-task-id="gen-0"><input type="checkbox" id="cb-gen-0"  onchange="toggleTask(&#39;gen-0&#39;, this)"><label for="cb-gen-0"><strong>Revisar la guía de París</strong> y marcar lo imprescindible con los niños</label></li>
-<li class="task-item " data-task-id="gen-1"><input type="checkbox" id="cb-gen-1"  onchange="toggleTask(&#39;gen-1&#39;, this)"><label for="cb-gen-1"><strong>Ver Amélie</strong> en familia · otras candidatas: Ratatouille, El jorobado de Notre Dame (¡toca visitarla!), Un monstruo en París, Hugo, Anastasia</label></li>
-<li class="task-item " data-task-id="gen-2"><input type="checkbox" id="cb-gen-2"  onchange="toggleTask(&#39;gen-2&#39;, this)"><label for="cb-gen-2"><strong>Mapas offline</strong> en el móvil (Google Maps: París, ruta completa)</label></li>
+<li class="task-item checked" data-task-id="gen-1"><input type="checkbox" id="cb-gen-1" checked onchange="toggleTask(&#39;gen-1&#39;, this)"><label for="cb-gen-1"><strong>Ver Amélie</strong> en familia ✔ · otras candidatas: Ratatouille, El jorobado de Notre Dame (¡toca visitarla!), Un monstruo en París, Hugo, Anastasia</label></li>
+<li class="task-item checked" data-task-id="gen-2"><input type="checkbox" id="cb-gen-2" checked onchange="toggleTask(&#39;gen-2&#39;, this)"><label for="cb-gen-2"><strong>Mapas offline</strong> en el móvil (Google Maps: París, ruta completa) ✔</label></li>
 <li class="task-item " data-task-id="gen-3"><input type="checkbox" id="cb-gen-3"  onchange="toggleTask(&#39;gen-3&#39;, this)"><label for="cb-gen-3"><strong>Nevera/bolsa térmica</strong> para el coche — agua y fruta fría contra el calor</label></li>
+<li class="task-item " data-task-id="gen-3b"><input type="checkbox" id="cb-gen-3b"  onchange="toggleTask(&#39;gen-3b&#39;, this)"><label for="cb-gen-3b"><strong>App FlashInvaders</strong> instalada (juego de buscar los mosaicos Space Invader) — hay piezas conocidas junto a Notre-Dame, el Panthéon, Shakespeare & Co y Montmartre, para que Pablo y Clara vayan cazándolas</label></li>
 <li class="task-item " data-task-id="gen-4"><input type="checkbox" id="cb-gen-4"  onchange="toggleTask(&#39;gen-4&#39;, this)"><label for="cb-gen-4"><strong>Imprimir/descargar</strong> reservas, entradas y certificados TSE en una carpeta del móvil</label></li>
 <li class="task-item " data-task-id="gen-5"><input type="checkbox" id="cb-gen-5"  onchange="toggleTask(&#39;gen-5&#39;, this)"><label for="cb-gen-5"><strong>Descargar app PayByPhone</strong> (App Store/Google Play) y crear cuenta con matrícula para pagar el aparcamiento en la calle en París — de pago L-S 9:00-20:00, domingos gratis</label></li>
 <li class="task-item " data-task-id="gen-6"><input type="checkbox" id="cb-gen-6"  onchange="toggleTask(&#39;gen-6&#39;, this)"><label for="cb-gen-6"><strong>Descargar app "Listen Everywhere"</strong> (Android/iPhone) — traducción de audio en algunas atracciones del Futuroscope</label></li>
@@ -2471,7 +2492,7 @@ function renderComida() {
 }
 
 // ---- PRESUPUESTO: persistencia en localStorage ----
-var PRESUPUESTO_BASE = [{"id": "mp_confirmado", "grupo": "✅ Confirmado", "label": "🌿 Mas Pareta (alquiler semana)", "estimado": 800}, {"id": "hotel_clermont", "grupo": "✅ Confirmado", "label": "🏨 Hotel Clermont-Ferrand (Ace Hôtel)", "estimado": 108.3}, {"id": "hotel_paris", "grupo": "✅ Confirmado", "label": "🏨 Hotel París (Citadines)", "estimado": 514.78}, {"id": "hotel_futuroscope", "grupo": "✅ Confirmado", "label": "🏨 Hotel Futuroscope (Campanile)", "estimado": 262.6}, {"id": "louvre", "grupo": "✅ Confirmado", "label": "🎨 Louvre (entradas)", "estimado": 44}, {"id": "futuroscope_aquascope", "grupo": "✅ Confirmado", "label": "🎡 Futuroscope 2 días + Aquascope", "estimado": 518}, {"id": "saintechapelle", "grupo": "✅ Confirmado", "label": "⛪ Sainte-Chapelle (entradas)", "estimado": 32}, {"id": "hotel_burdeos", "grupo": "🟠 Pendiente", "label": "🏨 Hotel Burdeos (1 noche, est.)", "estimado": 130}, {"id": "combustible", "grupo": "🟠 Pendiente", "label": "⛽ Combustible PHEV (~2.250 km, est.)", "estimado": 275}, {"id": "peajes", "grupo": "🟠 Pendiente", "label": "🛣️ Peajes España + Francia (est.)", "estimado": 141}, {"id": "metro_paris", "grupo": "🟠 Pendiente", "label": "🚇 Metro/RER París (est.)", "estimado": 70}, {"id": "notredame", "grupo": "🟠 Pendiente", "label": "🏔️ Torres de Notre-Dame (est.)", "estimado": 32}, {"id": "varios", "grupo": "🟠 Pendiente", "label": "🎒 Varios: parking, snacks, extras (est.)", "estimado": 215}, {"id": "orsay", "grupo": "⚪ Probable", "label": "🖼️ Museo Orsay (est.)", "estimado": 32}, {"id": "eiffel", "grupo": "⚪ Probable", "label": "🗼 Torre Eiffel", "estimado": 0}, {"id": "real_0731_parking", "grupo": "🧾 Gastos reales registrados", "label": "🅿️ 31/07 Parking — parquímetro L'Escala", "estimado": 0, "real": 4.00}, {"id": "real_0731_kayak", "grupo": "🧾 Gastos reales registrados", "label": "🚣 31/07 Entradas/Actividades — Kayak del Ter (Colomers)", "estimado": 0, "real": 49.50}, {"id": "real_0731_gasolina", "grupo": "🧾 Gastos reales registrados", "label": "⛽ 31/07 Gasolina — Estació Servei Corçà", "estimado": 0, "real": 56.90}, {"id": "real_0731_carga", "grupo": "🧾 Gastos reales registrados", "label": "🔌 31/07 Carga eléctrica coche — Iberdrola (Bilbao)", "estimado": 0, "real": 1.33}, {"id": "real_0729_devolucion", "grupo": "🧾 Gastos reales registrados", "label": "🔌 29/07 Devolución carga eléctrica — Movilidad MMD (Madrid)", "estimado": 0, "real": -1.95}, {"id": "real_0729_carga", "grupo": "🧾 Gastos reales registrados", "label": "🔌 29/07 Carga eléctrica coche — Movilidad MMD (Madrid)", "estimado": 0, "real": 5.40}, {"id": "real_0727_carga1", "grupo": "🧾 Gastos reales registrados", "label": "🔌 27/07 Carga eléctrica coche — Iberdrola (Bilbao)", "estimado": 0, "real": 2.00}, {"id": "real_0727_carga2", "grupo": "🧾 Gastos reales registrados", "label": "🔌 27/07 Carga eléctrica coche — Endolla BSM (Barcelona)", "estimado": 0, "real": 4.88}, {"id": "real_0728_capricho", "grupo": "🧾 Gastos reales registrados", "label": "🍦 28/07 Caprichos comida — Fleca Sancho (L'Armentera)", "estimado": 0, "real": 14.31}, {"id": "real_0730_capricho", "grupo": "🧾 Gastos reales registrados", "label": "🍦 30/07 Caprichos comida — Fleca Sancho (L'Armentera)", "estimado": 0, "real": 15.07}, {"id": "real_0731_capricho1", "grupo": "🧾 Gastos reales registrados", "label": "🍦 31/07 Caprichos comida — Strambotic (Girona)", "estimado": 0, "real": 3.00}, {"id": "real_0731_capricho2", "grupo": "🧾 Gastos reales registrados", "label": "🍦 31/07 Caprichos comida — Strambotic (Girona)", "estimado": 0, "real": 11.70}];
+var PRESUPUESTO_BASE = [{"id": "mp_confirmado", "grupo": "✅ Confirmado", "label": "🌿 Mas Pareta (alquiler semana)", "estimado": 800}, {"id": "hotel_clermont", "grupo": "✅ Confirmado", "label": "🏨 Hotel Clermont-Ferrand (Ace Hôtel)", "estimado": 108.3}, {"id": "hotel_paris", "grupo": "✅ Confirmado", "label": "🏨 Hotel París (Citadines)", "estimado": 514.78}, {"id": "hotel_futuroscope", "grupo": "✅ Confirmado", "label": "🏨 Hotel Futuroscope (Campanile)", "estimado": 262.6}, {"id": "louvre", "grupo": "✅ Confirmado", "label": "🎨 Louvre (entradas)", "estimado": 44}, {"id": "futuroscope_aquascope", "grupo": "✅ Confirmado", "label": "🎡 Futuroscope 2 días + Aquascope", "estimado": 518}, {"id": "saintechapelle", "grupo": "✅ Confirmado", "label": "⛪ Sainte-Chapelle (entradas)", "estimado": 32}, {"id": "hotel_burdeos", "grupo": "🟠 Pendiente", "label": "🏨 Hotel Burdeos (1 noche, est.)", "estimado": 130}, {"id": "combustible", "grupo": "🟠 Pendiente", "label": "⛽ Combustible PHEV (~2.250 km, est.)", "estimado": 275}, {"id": "peajes", "grupo": "🟠 Pendiente", "label": "🛣️ Peajes España + Francia (est.)", "estimado": 141}, {"id": "metro_paris", "grupo": "🟠 Pendiente", "label": "🚇 Metro/RER París (est.)", "estimado": 70}, {"id": "varios", "grupo": "🟠 Pendiente", "label": "🎒 Varios: parking, snacks, extras (est.)", "estimado": 215}, {"id": "orsay", "grupo": "⚪ Probable", "label": "🖼️ Museo Orsay (est.)", "estimado": 32}, {"id": "eiffel", "grupo": "⚪ Probable", "label": "🗼 Torre Eiffel", "estimado": 0}, {"id": "notredame", "grupo": "⚪ Probable", "label": "🏔️ Torres de Notre-Dame — decidido no subir", "estimado": 0}, {"id": "real_0731_parking", "grupo": "🧾 Gastos reales registrados", "label": "🅿️ 31/07 Parking — parquímetro L'Escala", "estimado": 0, "real": 4.00}, {"id": "real_0731_kayak", "grupo": "🧾 Gastos reales registrados", "label": "🚣 31/07 Entradas/Actividades — Kayak del Ter (Colomers)", "estimado": 0, "real": 49.50}, {"id": "real_0731_gasolina", "grupo": "🧾 Gastos reales registrados", "label": "⛽ 31/07 Gasolina — Estació Servei Corçà", "estimado": 0, "real": 56.90}, {"id": "real_0731_carga", "grupo": "🧾 Gastos reales registrados", "label": "🔌 31/07 Carga eléctrica coche — Iberdrola (Bilbao)", "estimado": 0, "real": 1.33}, {"id": "real_0729_devolucion", "grupo": "🧾 Gastos reales registrados", "label": "🔌 29/07 Devolución carga eléctrica — Movilidad MMD (Madrid)", "estimado": 0, "real": -1.95}, {"id": "real_0729_carga", "grupo": "🧾 Gastos reales registrados", "label": "🔌 29/07 Carga eléctrica coche — Movilidad MMD (Madrid)", "estimado": 0, "real": 5.40}, {"id": "real_0727_carga1", "grupo": "🧾 Gastos reales registrados", "label": "🔌 27/07 Carga eléctrica coche — Iberdrola (Bilbao)", "estimado": 0, "real": 2.00}, {"id": "real_0727_carga2", "grupo": "🧾 Gastos reales registrados", "label": "🔌 27/07 Carga eléctrica coche — Endolla BSM (Barcelona)", "estimado": 0, "real": 4.88}, {"id": "real_0728_capricho", "grupo": "🧾 Gastos reales registrados", "label": "🍦 28/07 Caprichos comida — Fleca Sancho (L'Armentera)", "estimado": 0, "real": 14.31}, {"id": "real_0730_capricho", "grupo": "🧾 Gastos reales registrados", "label": "🍦 30/07 Caprichos comida — Fleca Sancho (L'Armentera)", "estimado": 0, "real": 15.07}, {"id": "real_0731_capricho1", "grupo": "🧾 Gastos reales registrados", "label": "🍦 31/07 Caprichos comida — Strambotic (Girona)", "estimado": 0, "real": 3.00}, {"id": "real_0731_capricho2", "grupo": "🧾 Gastos reales registrados", "label": "🍦 31/07 Caprichos comida — Strambotic (Girona)", "estimado": 0, "real": 11.70}];
 function loadPresupuestoReal() { return JSON.parse(localStorage.getItem('presupuestoReal2026') || '{}'); }
 function loadPresupuestoExtra() { return JSON.parse(localStorage.getItem('presupuestoExtra2026') || '[]'); }
 function savePresupuestoExtra(arr) { localStorage.setItem('presupuestoExtra2026', JSON.stringify(arr)); }
@@ -2581,7 +2602,7 @@ function loadTaskState() {
 }
 
 // ---- CALENDARIO ----
-var CAL_DATA = {"2026-07-27": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-28": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-29": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-30": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-31": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-01": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-02": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-03": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": false}, "2026-08-04": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": false}, "2026-08-05": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": false}, "2026-08-06": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-07": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-08": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-09": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-10": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-11": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-12": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-13": {"color": "green", "label": "Peñacoba", "has": true}, "2026-08-14": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-15": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-16": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-17": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-18": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-19": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-20": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-21": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-22": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-23": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-24": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-25": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-26": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-27": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-28": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-29": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-30": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-31": {"color": "green", "label": "Peñacoba", "has": false}};
+var CAL_DATA = {"2026-07-27": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-28": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-29": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-30": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-07-31": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-01": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-02": {"color": "blue", "label": "Mas Pareta", "has": true}, "2026-08-03": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": true}, "2026-08-04": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": false}, "2026-08-05": {"color": "orange", "label": "Barcelona (descanso/preparación)", "has": false}, "2026-08-06": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-07": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-08": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-09": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-10": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-11": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-12": {"color": "red", "label": "Francia (ruta en coche)", "has": true}, "2026-08-13": {"color": "green", "label": "Peñacoba", "has": true}, "2026-08-14": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-15": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-16": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-17": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-18": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-19": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-20": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-21": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-22": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-23": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-24": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-25": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-26": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-27": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-28": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-29": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-30": {"color": "green", "label": "Peñacoba", "has": false}, "2026-08-31": {"color": "green", "label": "Peñacoba", "has": false}};
 var calMonth = 6; // julio = 6 (0-indexado), agosto = 7
 var calYear = 2026;
 var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -2651,10 +2672,63 @@ function openDayModal(dateStr, info) {
 function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); }
 function closeModalBg(e) { if (e.target.id === 'modal-overlay') closeModal(); }
 
+// LIGHTBOX de imágenes (entradas, QRs, confirmaciones) con zoom táctil
+var lbScale = 1, lbPanX = 0, lbPanY = 0, lbStartDist = 0, lbStartScale = 1, lbStartX = 0, lbStartY = 0, lbLastTap = 0;
+function lbApply() {
+  document.getElementById('lightbox-img').style.transform = 'translate(' + lbPanX + 'px,' + lbPanY + 'px) scale(' + lbScale + ')';
+}
+function openLightbox(src) {
+  var img = document.getElementById('lightbox-img');
+  img.src = src;
+  lbScale = 1; lbPanX = 0; lbPanY = 0; lbApply();
+  document.getElementById('lightbox-overlay').classList.add('active');
+}
+function closeLightbox(e) { if (e) e.stopPropagation(); document.getElementById('lightbox-overlay').classList.remove('active'); }
+function lbBgClick(e) { if (e.target.id === 'lightbox-overlay') closeLightbox(); }
+function lbTouchStart(e) {
+  if (e.touches.length === 2) {
+    lbStartDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    lbStartScale = lbScale;
+  } else if (e.touches.length === 1) {
+    lbStartX = e.touches[0].clientX - lbPanX;
+    lbStartY = e.touches[0].clientY - lbPanY;
+    var now = Date.now();
+    if (now - lbLastTap < 300) {
+      lbScale = lbScale > 1 ? 1 : 2.5; lbPanX = 0; lbPanY = 0; lbApply();
+    }
+    lbLastTap = now;
+  }
+}
+function lbTouchMove(e) {
+  e.preventDefault();
+  if (e.touches.length === 2) {
+    var dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    lbScale = Math.min(5, Math.max(1, lbStartScale * (dist / lbStartDist)));
+    lbApply();
+  } else if (e.touches.length === 1 && lbScale > 1) {
+    lbPanX = e.touches[0].clientX - lbStartX;
+    lbPanY = e.touches[0].clientY - lbStartY;
+    lbApply();
+  }
+}
+function initLightbox() {
+  var lbImg = document.getElementById('lightbox-img');
+  lbImg.addEventListener('touchstart', lbTouchStart, { passive: true });
+  lbImg.addEventListener('touchmove', lbTouchMove, { passive: false });
+  lbImg.addEventListener('dblclick', function() {
+    lbScale = lbScale > 1 ? 1 : 2.5; lbPanX = 0; lbPanY = 0; lbApply();
+  });
+  document.querySelectorAll('img').forEach(function(im) {
+    if (im.id === 'lightbox-img') return;
+    im.addEventListener('click', function() { openLightbox(im.src); });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   loadTaskState();
   renderPresupuesto();
   renderComida();
+  initLightbox();
 });
 </script>
 
